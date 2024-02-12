@@ -1,5 +1,4 @@
 import csv
-import os
 from pathlib import Path
 
 
@@ -17,9 +16,9 @@ class UserEntry:
         self.personal_phone: str = personal_phone
 
         if not Path(f"./{UserEntry.data_file}").is_file():
-            with open(UserEntry.data_file, mode='w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(UserEntry.__slots__)
+            with open(self.data_file, mode='w', newline='') as file:
+                writer = csv.DictWriter(file, fieldnames=UserEntry.__slots__)
+                writer.writeheader()
 
     def already_exists(self) -> bool:
         """
@@ -34,25 +33,56 @@ class UserEntry:
             return True
         return False
 
-    def get_entry(self, args):
-        pass
+    @classmethod
+    def delete_entry(cls, args) -> None:
+        updated_entries = []
+        entry_found = False
+
+        with open(cls.data_file, mode='r', newline='') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row == row | args:
+                    entry_found = True
+                else:
+                    updated_entries.append(row)
+
+        if not entry_found:
+            raise ValueError("Entry not found. Process has been cancelled.")
+        with open(cls.data_file, mode='w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=UserEntry.__slots__)
+            writer.writeheader()
+            writer.writerows(updated_entries)
+        print("Entry successfully deleted.")
 
     @classmethod
-    def return_all_entries(cls):
+    def edit_entry(cls, args):
+        updated_entries = []
+        entry_found = False
+        # NOT DONE YET
+        # with open(cls.data_file, mode='r', newline='') as file:
+        #     reader = csv.DictReader(file)
+        #     for row in reader:
+        #         if row == row | args:
+        #             entry_found = True
+        #         else:
+        #             updated_entries.append(row)
+
+    @classmethod
+    def print_all_entries(cls) -> None:
         with open(cls.data_file, mode='r', newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 print(row)
 
     @classmethod
-    def return_filtered_entries(cls, filtered_args):
+    def print_filtered_entries(cls, filtered_args) -> None:
         with open(cls.data_file, mode='r', newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 if row == row | filtered_args:
                     print(row)
 
-    def save_to_file(self):
+    def save_to_file(self) -> None:
         with open(self.data_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([getattr(self, attr) for attr in UserEntry.__slots__])

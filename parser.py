@@ -3,10 +3,12 @@ import argparse
 from models import UserEntry
 
 
-def get_creation_arguments() -> argparse.ArgumentParser:
+def get_creation_and_editing_arguments() -> argparse.ArgumentParser:
     base_user_arguments = argparse.ArgumentParser(add_help=False)
     for argument in UserEntry.__slots__:
         base_user_arguments.add_argument(f'--{argument}', required=True)
+    base_user_arguments.add_argument('--edit', action='store_const', const=True, default=False,
+                                     help='edit entry (default: create new entry)')
     return base_user_arguments
 
 
@@ -17,9 +19,9 @@ def get_search_arguments() -> argparse.ArgumentParser:
     return base_user_arguments
 
 
-def get_edit_and_delete_arguments() -> argparse.ArgumentParser:
+def get_deletion_arguments() -> argparse.ArgumentParser:
     base_user_arguments = argparse.ArgumentParser(add_help=False)
-    base_user_arguments.add_argument('--personal_phone')
+    base_user_arguments.add_argument('personal_phone')
     return base_user_arguments
 
 
@@ -29,64 +31,62 @@ class CommandParser:
         self.parser = argparse.ArgumentParser(description="Phone book management")
         self.subparsers = self.parser.add_subparsers(title="commands", dest="command")
 
-        creation_arguments = get_creation_arguments()
+        creation_and_editing_arguments = get_creation_and_editing_arguments()
         search_arguments = get_search_arguments()
-        create_and_delete_arguments = get_edit_and_delete_arguments()
-        self.user_add = self.subparsers.add_parser("adduser", parents=[creation_arguments],
+        deletion_arguments = get_deletion_arguments()
+        self.subparsers.add_parser("addentry", parents=[creation_and_editing_arguments],
                                                    help="Add a new entry to the phonebook.")
-        self.user_add = self.subparsers.add_parser("edituser", parents=[search_arguments],
+        self.subparsers.add_parser("editentry", parents=[deletion_arguments],
                                                    help="Edit entry with specified personal phone number.")
-        self.user_add = self.subparsers.add_parser("filter", parents=[search_arguments],
+        self.subparsers.add_parser("filter", parents=[search_arguments],
                                                    help="Search for entries in the phonebook.")
-        self.user_add = self.subparsers.add_parser("listusers", help="List all entries in the phonebook.")
-        self.user_add = self.subparsers.add_parser("deleteuser", parents=[create_and_delete_arguments],
+        self.subparsers.add_parser("listentries", help="List all entries in the phonebook.")
+        self.subparsers.add_parser("deleteentry", parents=[edit_and_delete_arguments],
                                                    help="Delete an entry with specified personal phone number.")
 
     @staticmethod
     def filter_args(args):
         return {key: value for key, value in args.items() if value is not None}
 
-    def _add_user_entry(self, args):
+    def _add_user_entry(self, args) -> None:
         user_entry = UserEntry(**args)
         if user_entry.already_exists():
             raise ValueError("Entry with this personal phone already exists.")
         user_entry.save_to_file()
 
-    def _edit_user_entry(self, args):
-        filtered_args = self.filter_args(args)
-        if len(filtered_args) == 0:
-            raise ValueError("No filters provided!")
-        user_entry = UserEntry(**args)
-        print("Editing user:", filtered_args)
+    def _edit_user_entry(self, args) -> None:
+        if args['personal_phone'] is None:
+            raise ValueError('Please provide the personal_phone number of the entry you want to delete.')
+        UserEntry.delete_entry(args)
 
-    def _filter_user_entries(self, args):
+    def _filter_user_entries(self, args) -> None:
         filtered_args = self.filter_args(args)
         if len(filtered_args) == 0:
             raise ValueError("No filters provided!")
         print("Filtering users based on specified parameters:", filtered_args)
-        UserEntry.return_filtered_entries(filtered_args)
+        UserEntry.print_filtered_entries(filtered_args)
 
     def _list_user_entries(self) -> None:
-        UserEntry.return_all_entries()
+        UserEntry.print_all_entries()
 
-    def _delete_user(self, args) -> None:
+    def _delete_user_entry(self, args) -> None:
         if args['personal_phone'] is None:
             raise ValueError('Please provide the personal_phone number of the entry you want to delete.')
-        print("Deleting user: ", args)
+        UserEntry.delete_entry(args)
 
-    def run(self):
+    def run(self) -> None:
         args = self.parser.parse_args()
         self.args = vars(args)
         command = self.args.pop("command")
-        if command == 'adduser':
+        if command == 'addentry':
             self._add_user_entry(self.args)
-        elif command == 'edituser':
+        elif command == 'editentry':
             self._edit_user_entry(self.args)
         elif command == 'filter':
             self._filter_user_entries(self.args)
-        elif command == 'listusers':
+        elif command == 'listentries':
             self._list_user_entries()
-        elif command == 'deleteuser':
-            self._delete_user(self.args)
+        elif command == 'deleteentry':
+            self._delete_user_entry(self.args)
 
 
