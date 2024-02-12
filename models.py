@@ -58,14 +58,23 @@ class UserEntry:
     def edit_entry(cls, args):
         updated_entries = []
         entry_found = False
-        # NOT DONE YET
-        # with open(cls.data_file, mode='r', newline='') as file:
-        #     reader = csv.DictReader(file)
-        #     for row in reader:
-        #         if row == row | args:
-        #             entry_found = True
-        #         else:
-        #             updated_entries.append(row)
+        search_phone_part = {'personal_phone': args['personal_phone']}
+        with open(cls.data_file, mode='r', newline='') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row == row | search_phone_part:
+                    entry_found = True
+                    updated_entries.append(args)
+                else:
+                    updated_entries.append(row)
+
+        if not entry_found:
+            raise ValueError('Entry with this personal phone not found. Process has been cancelled.')
+        with open(cls.data_file, mode='w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=UserEntry.__slots__)
+            writer.writeheader()
+            writer.writerows(updated_entries)
+        print("Entry successfully edited.")
 
     @classmethod
     def print_all_entries(cls) -> None:

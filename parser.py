@@ -24,7 +24,6 @@ def get_deletion_arguments() -> argparse.ArgumentParser:
     base_user_arguments.add_argument('personal_phone')
     return base_user_arguments
 
-
 class CommandParser:
     def __init__(self):
 
@@ -34,14 +33,12 @@ class CommandParser:
         creation_and_editing_arguments = get_creation_and_editing_arguments()
         search_arguments = get_search_arguments()
         deletion_arguments = get_deletion_arguments()
-        self.subparsers.add_parser("addentry", parents=[creation_and_editing_arguments],
+        self.subparsers.add_parser("entry", parents=[creation_and_editing_arguments],
                                                    help="Add a new entry to the phonebook.")
-        self.subparsers.add_parser("editentry", parents=[deletion_arguments],
-                                                   help="Edit entry with specified personal phone number.")
         self.subparsers.add_parser("filter", parents=[search_arguments],
                                                    help="Search for entries in the phonebook.")
         self.subparsers.add_parser("listentries", help="List all entries in the phonebook.")
-        self.subparsers.add_parser("deleteentry", parents=[edit_and_delete_arguments],
+        self.subparsers.add_parser("deleteentry", parents=[deletion_arguments],
                                                    help="Delete an entry with specified personal phone number.")
 
     @staticmethod
@@ -55,9 +52,7 @@ class CommandParser:
         user_entry.save_to_file()
 
     def _edit_user_entry(self, args) -> None:
-        if args['personal_phone'] is None:
-            raise ValueError('Please provide the personal_phone number of the entry you want to delete.')
-        UserEntry.delete_entry(args)
+        UserEntry.edit_entry(args)
 
     def _filter_user_entries(self, args) -> None:
         filtered_args = self.filter_args(args)
@@ -78,10 +73,12 @@ class CommandParser:
         args = self.parser.parse_args()
         self.args = vars(args)
         command = self.args.pop("command")
-        if command == 'addentry':
-            self._add_user_entry(self.args)
-        elif command == 'editentry':
-            self._edit_user_entry(self.args)
+        if command == 'entry':
+            editing_existing_entry = self.args.pop('edit')
+            if editing_existing_entry:
+                self._edit_user_entry(self.args)
+            else:
+                self._add_user_entry(self.args)
         elif command == 'filter':
             self._filter_user_entries(self.args)
         elif command == 'listentries':
