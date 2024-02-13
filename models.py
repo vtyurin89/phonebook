@@ -21,9 +21,6 @@ class UserEntry:
                 writer.writeheader()
 
     def already_exists(self) -> bool:
-        """
-        This method uses personal_phone as primary key to check if the user entry already exists.
-        """
         personal_phone_set = set()
         with open(self.data_file, mode='r', newline='') as file:
             reader = csv.DictReader(file)
