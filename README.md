@@ -23,7 +23,13 @@
 ### Создание новой записи
 Для создания новой записи нужно ввести команду, содержащую именованные аргументы:
 
-    python phone.py entry --last_name LAST_NAME --first_name FIRST_NAME --middle_name MIDDLE_NAME --organization ORGANIZATION --work_phone WORK_PHONE --personal_phone PERSONAL_PHONE
+    python phone.py entry \
+        --last_name LAST_NAME \
+        --first_name FIRST_NAME \
+        --middle_name MIDDLE_NAME \
+        --organization ORGANIZATION \
+        --work_phone WORK_PHONE \
+        --personal_phone PERSONAL_PHONE
 
 Например:
 
@@ -32,7 +38,14 @@
 
 ### Редактирование существующей записи
 
-    python phone.py entry --last_name LAST_NAME --first_name FIRST_NAME --middle_name MIDDLE_NAME --organization ORGANIZATION --work_phone WORK_PHONE --personal_phone PERSONAL_PHONE [--edit]
+    python phone.py entry \
+        --last_name LAST_NAME \
+        --first_name FIRST_NAME \
+        --middle_name MIDDLE_NAME \
+        --organization ORGANIZATION \
+        --work_phone WORK_PHONE \
+        --personal_phone PERSONAL_PHONE \
+       [--edit]
 
 Чтобы отредактировать уже существующую запись, нужно ввести ту же команду, что и при создании новой записи, и в конце добавить аргумент --edit
 
@@ -56,9 +69,15 @@ python phone.py listentries
 ```
 ### Поиск (фильтрация) записей
 Чтобы вывести в консоль не все имеющиеся записи, а только соответствующие определённым критериям, нужно ввести команду:
-```
-python phone.py filter [--last_name LAST_NAME] [--first_name FIRST_NAME] [--middle_name MIDDLE_NAME] [--organization ORGANIZATION] [--work_phone WORK_PHONE] [--personal_phone PERSONAL_PHONE]
-```
+
+    python phone.py filter \
+        [--last_name LAST_NAME] \
+        [--first_name FIRST_NAME] \
+        [--middle_name MIDDLE_NAME] \
+        [--organization ORGANIZATION] \
+        [--work_phone WORK_PHONE] \
+        [--personal_phone PERSONAL_PHONE]
+
 Вы можете указать сколько угодно именованных аргументов для фильтрации, но как минимум один должен быть обязательно.
 
 Пример использования:
